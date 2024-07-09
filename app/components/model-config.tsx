@@ -1,11 +1,6 @@
-import {
-  ModalConfigValidator,
-  ModelConfig,
-  dall2Size,
-  dall3Size,
-  dall3Style,
-  dall2modes,
-} from "../store";
+import { ServiceProvider } from "@/app/constant";
+import { ModalConfigValidator, ModelConfig } from "../store";
+import { dall2Size, dall3Size, dall3Style, dall2modes } from "../store";
 
 import Locale from "../locales";
 import { InputRange } from "./input-range";
@@ -23,6 +18,8 @@ export function ModelConfigList(props: {
   const isDalle2ModelV = isDalle2Model(props.modelConfig.model);
   const isDalle3ModelV = isDalle3Model(props.modelConfig.model);
   const currentSizes = isDalle3ModelV ? dall3Size : dall2Size;
+  const value = `${props.modelConfig.model}@${props.modelConfig?.providerName}`;
+
   return (
     <>
       <ListItem
@@ -30,10 +27,12 @@ export function ModelConfigList(props: {
         subTitle={isDalleModelV ? Locale.Settings.dall2Mode.ModelTips : ""}
       >
         <Select
-          value={props.modelConfig.model}
+          value={value}
           onChange={(e) => {
+            const [model, providerName] = e.currentTarget.value.split("@");
             props.updateConfig((config) => {
-              config.model = ModalConfigValidator.model(e.currentTarget.value);
+              config.model = ModalConfigValidator.model(model);
+              config.providerName = providerName as ServiceProvider;
               config.n = DEFAULT_CONFIG.modelConfig.n;
               config.size = DEFAULT_CONFIG.modelConfig.size;
             });
@@ -42,14 +41,15 @@ export function ModelConfigList(props: {
           {allModels
             .filter((v) => v.available)
             .map((v, i) => (
-              <option value={v.name} key={i}>
+              <option value={`${v.name}@${v.provider?.providerName}`} key={i}>
                 {v.displayName}({v.provider?.providerName})
               </option>
             ))}
         </Select>
       </ListItem>
 
-      {!isDalleModelV && (
+      {isDalleModelV ||
+      props.modelConfig?.providerName == ServiceProvider.Google ? null : (
         <>
           <ListItem
             title={Locale.Settings.Temperature.Title}
