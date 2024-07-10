@@ -48,7 +48,7 @@ export interface OpenAIListModelResponse {
   }>;
 }
 
-interface RequestPayload {
+export interface RequestPayload {
   messages: {
     role: "system" | "user" | "assistant";
     content: string | MultimodalContent[];
